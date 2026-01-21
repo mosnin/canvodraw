@@ -146,37 +146,44 @@ npm run dev
 
 1. In your Railway project, click "New" → "GitHub Repo"
 2. Select your repository
-3. Configure the service:
-   - **Name**: `backend`
-   - **Root Directory**: `backend`
-   - **Build Command**: `npm install`
-   - **Start Command**: `npm start`
+3. **CRITICAL**: Configure the Root Directory:
+   - Click on the newly created service
+   - Go to "Settings" tab
+   - Scroll to "Service Settings"
+   - Set **Root Directory** to `backend`
+   - Railway will automatically detect the Node.js app and use nixpacks.toml
 
-4. Go to "Variables" and add:
-   - `DATABASE_URL` - Should be automatically linked from PostgreSQL service
-   - `NODE_ENV` - Set to `production`
+4. Go to "Variables" tab and configure:
+   - `DATABASE_URL` - Click "Add Reference" → Select PostgreSQL service → DATABASE_URL
+   - `NODE_ENV` - Add new variable with value `production`
 
-5. Go to "Settings":
-   - Enable "Public Networking"
+5. Go to "Settings" tab:
+   - Under "Networking", click "Generate Domain" to enable public access
    - Note the public domain (e.g., `backend-production-xxxx.up.railway.app`)
+
+6. The service will automatically deploy once configured
 
 ### Step 5: Deploy Frontend
 
 1. In your Railway project, click "New" → "GitHub Repo"
 2. Select your repository again
-3. Configure the service:
-   - **Name**: `frontend`
-   - **Root Directory**: `frontend`
-   - **Build Command**: `npm install && npm run build`
-   - **Start Command**: `npm run preview`
+3. **CRITICAL**: Configure the Root Directory:
+   - Click on the newly created service
+   - Go to "Settings" tab
+   - Scroll to "Service Settings"
+   - Set **Root Directory** to `frontend`
+   - Railway will automatically detect the Node.js app and use nixpacks.toml
 
-4. Go to "Variables" and add:
-   - `VITE_API_URL` - Set to your backend public URL (e.g., `https://backend-production-xxxx.up.railway.app`)
-   - `VITE_WS_URL` - Set to your backend WebSocket URL (e.g., `wss://backend-production-xxxx.up.railway.app`)
+4. Go to "Variables" tab and add (use your actual backend URL from Step 4):
+   - `VITE_API_URL` - Your backend URL (e.g., `https://backend-production-xxxx.up.railway.app`)
+   - `VITE_WS_URL` - Your backend WebSocket URL (e.g., `wss://backend-production-xxxx.up.railway.app`)
+   - **Important**: Use `https://` for API URL and `wss://` (not `ws://`) for WebSocket URL
 
-5. Go to "Settings":
-   - Enable "Public Networking"
+5. Go to "Settings" tab:
+   - Under "Networking", click "Generate Domain" to enable public access
    - Note the public domain (e.g., `frontend-production-yyyy.up.railway.app`)
+
+6. The service will automatically build and deploy
 
 ### Step 6: Verify Deployment
 
@@ -284,6 +291,24 @@ CREATE INDEX idx_strokes_room_id ON strokes(room_id);
 ```
 
 ## Troubleshooting
+
+### Railway Build Errors
+
+#### "Script start.sh not found" or "Could not determine how to build"
+This error occurs when Railway cannot find the correct build configuration. **This is a monorepo**, so you must:
+
+1. **Set the Root Directory** for each service:
+   - Click on the service in Railway
+   - Go to "Settings" tab
+   - Find "Service Settings" section
+   - Set "Root Directory" to either `backend` or `frontend`
+   - Click "Save" and redeploy
+
+2. Verify the `nixpacks.toml` file exists in the service directory
+3. Check that `package.json` exists in the root directory you specified
+4. If the build still fails, check Railway build logs for specific errors
+
+**Important**: Each Railway service should have its Root Directory configured to point to either `backend` or `frontend`, not the repository root.
 
 ### WebSocket Connection Issues
 - Ensure VITE_WS_URL uses `wss://` (not `ws://`) for production
